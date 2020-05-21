@@ -1,0 +1,61 @@
+@isTest
+private class MaintenanceTest {
+    @isTest
+    static void TestautomationLogic(){
+        // test data setup
+        List<Product2> eqList = new List<Product2>();
+        List<case> caseList = new List<case>();
+        Product2 eq1 = new product2(Name='test1', Maintenance_Cycle__c=180);
+        Product2 eq2 = new product2(Name='test2', Maintenance_Cycle__c=240);
+        eqList.add(eq1);
+        eqList.add(eq2);
+        insert eqList;
+        
+        Vehicle__c v1 = new Vehicle__c(name='testV');
+        insert v1;
+   
+        Case MainReq1 = new Case(
+            Status='New',
+            Origin='web',
+            Type='Repair',
+            Subject='Repair',
+            Vehicle__c=v1.Id,
+            Equipment__c=eq1.ID,
+            Date_Reported__c=Date.today(),
+            Date_Due__c=Date.today().addDays(3)
+        );
+        
+        Case MainReq2 = new Case(
+                    Status='New',
+                    Origin='web',
+                    Type='Routine Maintenance',
+                    Subject='Routine Maintenance',
+                    Vehicle__c=v1.Id,
+                    Equipment__c=eq2.ID,
+                    Date_Reported__c=Date.today(),
+                    Date_Due__c=Date.today().addDays(3)
+        );
+        caseList.add(MainReq1);
+        caseList.add(MainReq2);
+        insert caseList;
+        
+        // perform test
+        for(Case c: caseList){
+            c.Status = 'Closed';
+        }
+        Test.startTest();
+        System.debug(caseList);
+        Database.SaveResult[] result = Database.update(caseList, false);
+        Test.stopTest();
+        
+        // Verify
+        for(Database.SaveResult sr: result){
+            System.assert(sr.isSuccess());
+        }
+        AggregateResult[] numCase = [SELECT COUNT(ID) FROM Case];
+        System.debug((Integer)numCase[0].get('expr0'));
+        System.assertEquals(4, (Integer)numCase[0].get('expr0'), 'Not 3 cases');
+        
+    }
+
+}

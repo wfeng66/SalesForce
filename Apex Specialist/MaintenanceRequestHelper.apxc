@@ -1,0 +1,38 @@
+public with sharing class MaintenanceRequestHelper {
+    
+    public static void updateWorkOrders(List<Case> caseList) {
+        // TODO: Complete the method to update workorders
+        
+        // create a map between Maintenance_Request_r.ID and minCycle
+        Map<String, Integer> CycleById = new Map<String, Integer>();
+        
+        for(AggregateResult minc: [SELECT ID cID,
+                                   min(Equipment__r.Maintenance_Cycle__c) cycle
+                                   FROM case 
+                                   WHERE ID in :caseList
+                                   GROUP BY ID ]){
+                                       Integer minCycle = Integer.valueOf(minc.get('cycle'));
+                                       CycleById.put((String)minc.get('cID'), minCycle);
+                                   }
+        // create new request list
+        List<Case> Requests = new List<Case>();
+        for(Case c: caseList){
+            if(c.Status=='Closed' && (c.Type=='Repair'||c.Type=='Routine Maintenance')){
+                Case Req = new Case(
+                    Status='New',
+                    Origin='web',
+                    Type='Routine Maintenance',
+                    Subject='Routine Maintenance',
+                    Vehicle__c=c.Vehicle__c,
+                    Equipment__c=c.Equipment__c,
+                    Date_Reported__c=Date.today(),
+                    Date_Due__c=Date.today()+CycleById.get(c.Id)
+                );
+                Requests.add(Req);
+            }  
+        }
+        insert Requests;   
+        
+    }        
+    
+}

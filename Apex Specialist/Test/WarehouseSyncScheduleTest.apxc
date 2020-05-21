@@ -1,0 +1,64 @@
+@isTest
+private class WarehouseSyncScheduleTest {
+    public static String CRON_EXP = '0 0 1 * * ?';
+    
+    @isTest
+    static void testWarehouseSyncSchedule(){
+        // create a equipment record to mock existing record
+        Product2 eq = new Product2(
+            Name = 'Generator 1000 kW',
+            Replacement_Part__c = false,
+            Cost__c = 5000,
+            Current_Inventory__c = 10,
+            Lifespan_Months__c = 120,
+            Maintenance_Cycle__c = 365,
+            Warehouse_SKU__c = '100003'
+        );
+        insert eq;
+               /*
+        Test.startTest();
+        // set mock callout class
+        Test.setMock(HttpCalloutMock.class, new WarehouseCalloutServiceMock());
+        // schedule the test
+        String jobId = System.Schedule('Scheduled Warehouse Synchronization', 
+                                       CRON_EXP, new WarehouseSyncSchedule());
+        List<Product2> eqex = [SELECT Id FROM Product2];        
+        System.debug(eqex.size());
+        Test.stopTest();
+        // verify
+        List<Product2> rs = [SELECT Warehouse_SKU__c FROM Product2];
+        System.debug('###########');
+        System.debug(rs.size());
+        System.assertEquals(2, rs.size(), 'not 2 records');
+        System.assertEquals('100003', rs[0].Warehouse_SKU__c, 'not 100003');
+        System.assertEquals('100004', rs[1].Warehouse_SKU__c, 'not 100004');
+        
+        */
+        
+        
+        
+        
+
+        
+        Test.startTest();
+        // set mock callout class
+        Test.setMock(HttpCalloutMock.class, new WarehouseCalloutServiceMock());
+        // schedule the test
+        String jobId = System.Schedule('Scheduled Warehouse Synchronization', 
+                                       CRON_EXP, new WarehouseSyncSchedule());
+        List<Product2> eqex = [SELECT Id FROM Product2];        
+        System.debug(eqex.size());
+        Test.stopTest();
+        List<Product2> eqch = [SELECT Warehouse_SKU__c FROM Product2];     
+        //List<Product2> rs = [SELECT Warehouse_SKU__c FROM Product2];
+        System.debug('#############');
+        System.debug(eqch.size());
+        System.assertEquals('100003', eqch[0].Warehouse_SKU__c, 'not 100003');
+        //System.assertEquals('100004', eqch[1].Warehouse_SKU__c, 'not 100004');
+        CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime From CronTrigger 
+           WHERE id = :jobId];
+        System.assertEquals(CRON_EXP, ct.CronExpression);
+
+    }
+
+}

@@ -1,0 +1,8 @@
+global with sharing class WarehouseSyncSchedule implements Schedulable{
+    // implement scheduled code here
+    global void execute(SchedulableContext ctx){
+        System.debug('before getting into callout service');
+        WarehouseCalloutService.runWarehouseEquipmentSync();
+        System.debug('after getting into callout service');
+    }
+}

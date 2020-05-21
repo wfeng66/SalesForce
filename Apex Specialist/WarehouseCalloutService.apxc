@@ -1,0 +1,39 @@
+public with sharing class WarehouseCalloutService {
+
+    private static final String WAREHOUSE_URL = 'https://th-superbadge-apex.herokuapp.com/equipment';
+    @future(callout=true)
+    public static void runWarehouseEquipmentSync() {
+        //ToDo: complete this method to make the callout (using @future) to the
+        //      REST endpoint and update equipment on hand.
+        System.debug('inside callout service');
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(WAREHOUSE_URL);
+        request.setMethod('GET');
+        HttpResponse response = http.send(request);
+        // If the request is successful, parse the JSON response.
+        if (response.getStatusCode() == 200) {
+            // Deserializes the JSON string into collections of primitive data types.
+            List<Product2> Equpments = new List<Product2>();
+            List<Object> results = (List<Object>) JSON.deserializeUntyped(response.getBody());
+            
+            for(Object i: results){
+                Product2 eq = new Product2();
+                Map<String, Object> part = (Map<String, Object>)i;
+                eq.Name = String.valueof(part.get('name'));
+                eq.Replacement_Part__c = Boolean.valueof(part.get('replacement'));
+                eq.Cost__c = Integer.valueof(part.get('cost'));
+                eq.Current_Inventory__c = Integer.valueof(part.get('quantity'));
+                eq.Lifespan_Months__c = Integer.valueof(part.get('lifespan'));
+                eq.Maintenance_Cycle__c = Integer.valueof(part.get('maintenanceperiod'));
+                eq.Warehouse_SKU__c = String.valueof(part.get('sku'));
+                //System.debug(part.get('name'));
+                Equpments.add(eq);
+            }
+            upsert Equpments Warehouse_SKU__c;
+        }
+        System.debug('@@@@@@@@@@@@@@');
+        List<Product2> eqch = [SELECT Id FROM Product2];        
+        System.debug(eqch.size());
+    }
+}
