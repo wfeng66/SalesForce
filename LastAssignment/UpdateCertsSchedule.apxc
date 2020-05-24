@@ -1,0 +1,11 @@
+global class UpdateCertsSchedule implements Schedulable {
+   
+    global void execute(SchedulableContext ctx){
+        List<ID> appID = new List<ID>();
+        For(Applicant__c app: [SELECT ID FROM Applicant__c]){
+            appID.add(app.ID);
+        }
+        
+        UpdateCertsBatch.UpdateBatch(appID);
+    }
+}

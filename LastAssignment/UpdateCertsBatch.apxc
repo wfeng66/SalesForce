@@ -1,0 +1,23 @@
+public class UpdateCertsBatch {
+    
+    @InvocableMethod
+    public static void UpdateBatch(List<ID> applicantIds) {
+        
+        Set<ID> applicantSet = new Set<ID>(); 
+        for(ID applicantId : applicantIds)
+        {
+            applicantSet.add(applicantId);
+            if(applicantSet.size() == 100)
+            {
+                UpdateCerts.RefreshCerts(applicantSet);
+                applicantSet.clear();
+            }  
+        }
+
+        if(applicantSet.size() > 0)
+        {
+            
+            UpdateCerts.RefreshCerts(applicantSet);
+        }
+    }
+}

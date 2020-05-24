@@ -1,0 +1,74 @@
+@isTest
+private class checkCertsTest {
+    
+    public static String CRON_EXP = '0 30 16 ? * * *';
+   
+    @testSetup
+    static void DataSetup(){
+        // prepare data
+        List<Applicant__c> appsList = new List<Applicant__c>();
+        List<Certification__c> certsList = new List<Certification__c>();
+        
+        for(integer i = 0; i<150; i++){
+            Applicant__c appRcd = new Applicant__c(
+                First_Name__c = 'testf_' + i,
+                Last_Name__c = 'testl_' + i,
+                Email__c = 'test' + i + '@test.com',
+                Status__c = 'Applicant'
+            );
+            appsList.add(appRcd);
+        }
+        insert appsList;
+        
+        for(integer j = 0; j<150; j++){
+            Certification__c cert = new Certification__c(
+                Applicant__c = appsList[j].id,
+                Name = 'Salesforce Dev 1',
+                Certification_ID__c = '5a6ce86e2af929789500e7e4',
+                Hash_Id__c = '5a6ce86e2af929789500e7e4'
+            );
+            certsList.add(cert);
+        }
+        insert certsList;
+        //List<sObject> CertValueList = Test.loadData(Cert_Value__c.sObjectType, 'CertValue');
+        Cert_Value__c CertValue = new Cert_Value__c(
+            Name = 'Field Service Lightning Consultant',
+            ID_Hash__c = '5a6ce86f2af929789500e7f5'
+        );
+        insert CertValue;
+    }
+  
+    @isTest
+    static void TestCertscheck(){
+        Test.setMock(HttpCalloutMock.class, new CertsHttpCalloutMock());
+
+        List<ID> appID = new List<ID>();
+        for(Applicant__c each: [SELECT id FROM Applicant__c]){
+            appID.add(each.id);
+        }
+        
+        Test.startTest();
+        UpdateCertsBatch.UpdateBatch(appID);
+        Test.stopTest();
+        
+        List<Certification__c> newCerts = new List<Certification__c>(
+            [SELECT id FROM Certification__c]);
+        System.assert(newCerts.size()!=150);
+    }
+   
+    @isTest
+    static void ScheduleTest(){
+        Test.setMock(HttpCalloutMock.class, new CertsHttpCalloutMock());
+        
+        Test.startTest();
+        String jobId = System.schedule('ScheduledApexTest',
+                                       CRON_EXP, 
+                                       new UpdateCertsSchedule());  
+        Test.stopTest();
+        
+        /*List<Certification__c> newCerts = new List<Certification__c>(
+            [SELECT id FROM Certification__c]);
+        system.debug('newCerts: ' + newCerts.size());
+        System.assert(newCerts.size()!=150);*/
+    }
+}

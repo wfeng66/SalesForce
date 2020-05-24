@@ -1,0 +1,68 @@
+public class UpdateCerts {
+    
+    @future( callout = true)
+    public static void RefreshCerts(Set<ID> applicantIds) {
+        System.debug('inside');
+        system.debug('applicantIds: ' + applicantIds.size());
+        List<Certification__c> certsToDelete = new List<Certification__c>();
+        List<Certification__c> certsToAdd = new List<Certification__c>();
+
+        // Create maps for figuring out the difference between existing certification and the "actual certifications"
+        // Hash : Cert Name
+        Map<String, String> certNameByID = CreateMaps.CreateCertNameByID();
+        // Applicant ID : Certifications
+        Map<Id, Applicant__c> applicantsById = CreateMaps.CreateApplicantsByID(applicantIDs);
+
+        // Check the difference for each applicants
+        for(ID appID: applicantsByID.keySet()) {
+            // Call out for whole certifications ID list
+            Http http = new Http();
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint('https://programming-quotes-api.herokuapp.com/quotes/page/1');
+            request.setMethod('GET');
+            HttpResponse response = http.send(request);
+            
+            if(response.getStatusCode() == 200) {
+                // Deserialize the HttpResponse
+                List<CertDetails> certs = (List<CertDetails>)JSON.deserialize(
+                response.getBody().replace('"_id":', '"id_x":'),
+                List<CertDetails>.class
+            );
+                // Randomly create a certsFound list as "actual" certification list
+                Integer numCerts = RandomCerts.getRandomCertNumber();
+                List<CertDetails> certsFound = RandomCerts.getRandomCerts(certs,numCerts);
+
+                // Find the difference 
+                List<Certification__c> newCertsToDelete = new List<Certification__c>();
+                List<Certification__c> newCertsToAdd = new List<Certification__c>();
+                newCertsToDelete = FindDiff.CertsInsideApplicantsButFound(appId, applicantsById, certsFound);
+                newCertsToAdd = FindDiff.CertsInsideFoundButApplicants(appId, applicantsById, certsFound, certNameByID); 
+
+                if(newCertsToDelete.size()>0){
+                    certsToDelete.addAll(newCertsToDelete);
+                }
+                if(newCertsToAdd.size()>0){
+                    certsToAdd.addAll(newCertsToAdd);
+                }
+            }    
+        }
+    
+        for(Certification__c toadd: certsToAdd){
+            for(Certification__c cert: [SELECT ID, Name FROM Certification__c WHERE Applicant__c=: toadd.Applicant__c]){
+                if(cert.Name == toadd.Name){
+                    System.debug(toadd.Applicant__c + ', ' + cert.Name);
+                }
+            }
+        }
+        
+        
+        if(certsToAdd.size() > 0) {
+            insert certsToAdd;
+        }
+        
+        if(certsToDelete.size() > 0 ) {
+            delete certsToDelete;
+        }
+        
+    }
+}

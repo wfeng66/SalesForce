@@ -1,0 +1,24 @@
+public class CreateMaps {
+
+    public static Map<String, String> CreateCertNameByID(){
+        Map<String, String> certNameByID = new Map<String, String>();
+        List<Cert_Value__c> possibleCertList = [SELECT Name, ID_Hash__c FROM Cert_Value__c];
+        for(Cert_Value__c each: possibleCertList) {
+            certNameById.put(each.ID_Hash__c, each.Name);
+        }
+        return certNameById;
+    }
+    
+    public static Map<Id, Applicant__c> CreateApplicantsByID(Set<ID> applicantIDs){
+        Map<Id, Applicant__c> applicantsById = new Map<Id, Applicant__c>();
+        for (Applicant__c each: [
+            SELECT ID, First_Name__c,
+            (SELECT Name, Certification_ID__c, ID
+             FROM Certifications__r)
+            FROM Applicant__c WHERE ID IN :applicantIDs])
+        {
+            applicantsById.put(each.Id, each);
+        }
+        return applicantsById;
+    }
+}

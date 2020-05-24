@@ -1,0 +1,17 @@
+public class RandomCerts {
+    public static Integer getRandomCertNumber(){
+        Double d = math.random() * 2;
+        return d.intValue() + 1;
+    }
+    
+    public static List<CertDetails> getRandomCerts(List<CertDetails> remainingCerts, Integer numReturned)
+    {
+        List<CertDetails> actualCerts = new List<CertDetails>();
+        for(Integer i = 0; i < numReturned; i++) {
+            Integer randomNumber = Integer.valueOf(math.random() * remainingCerts.size() - 1);
+            actualCerts.add(remainingCerts[randomNumber]);
+            remainingCerts.remove(randomNumber);
+        }
+        return actualCerts;  
+    }
+}

@@ -1,0 +1,50 @@
+public class FindDiff {
+    
+    public static List<Certification__c> CertsInsideApplicantsButFound(ID appId, Map<Id, Applicant__c> applicantsById, List<CertDetails>certsFound){
+        List<Certification__c> certsToDelete = new List<Certification__c>();
+        
+        /*****   REMOVE CERTS OPERATION ********/
+        //Loop through certs found on on applicants certs Related List
+        //Compare against certs found for applicant on API
+        //If API does not have the cert on the applicants list then it needs to be removed
+        for(Certification__c theCert: applicantsById.get(appId).Certifications__r){
+            Boolean certExists = false;
+            for(CertDetails eachCert :certsFound) {
+                if(theCert.Certification_ID__c.contains(eachCert.ID)){
+                    certExists = true;
+                }  
+            }
+            if(!certExists) {
+                certsToDelete.add(theCert);
+            }
+        }
+        return certsToDelete;
+    }
+    
+    public static List<Certification__c> CertsInsideFoundButApplicants(ID appId, Map<Id, Applicant__c> applicantsById, List<CertDetails>certsFound, Map<String, String> certNameByID){
+        List<Certification__c> certsToAdd = new List<Certification__c>();
+        
+        /*****   ADD CERTS OPERATION ********/
+        //Loop through certs found on the api for this applicant t
+        //Compare against certs found on this applicants certification list
+        //If cert in api list does not exist in applicant list
+        //Add it
+        for(CertDetails eachCert :certsFound) {
+            Boolean certExists = false;
+            for(Certification__c theCert: applicantsById.get(appId).Certifications__r){
+                if(eachCert.ID.contains(theCert.Certification_ID__c)) {
+                    certExists = true;
+                }  
+            }
+            if(!certExists) {
+                Certification__c addCert = new Certification__c(
+                    Certification_ID__c = eachCert.ID,
+                    Name = certNameById.get(eachCert.ID),
+                    Applicant__c = appId
+                );
+                certsToAdd.add(addCert);
+            }
+        }
+        return certsToAdd;
+    }
+}
