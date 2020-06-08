@@ -1,0 +1,24 @@
+@isTest
+private class LeadProcessorTest {
+    @testSetup
+    static void setup(){
+        List<Lead> leads = new List<Lead>();
+        for(Integer i=0; i<200; i++){
+            leads.add(new Lead(FirstName='fn '+i, LastName='ln '+i,
+                               Company='Company '+i, Status='Open'));
+        }
+        insert leads;
+    }
+    
+    static testmethod void test(){
+        Test.startTest();
+             LeadProcessor lp = new LeadProcessor();
+             Id batchId = Database.executeBatch(lp);
+        Test.stopTest();
+        for(Lead l: [SELECT LeadSource FROM Lead]){
+            System.debug(l.LeadSource);
+            //System.assertEquals('Dreamforce', l.LeadSource);
+        }
+    }
+
+}

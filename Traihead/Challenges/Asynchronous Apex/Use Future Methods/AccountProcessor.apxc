@@ -1,0 +1,21 @@
+public class AccountProcessor {
+    @future
+    public static void countContacts(List<Id> accIds){
+        List<Account> accs = new List<Account>();
+
+        for(Id accid: accIds){
+            AggregateResult numConts = [SELECT COUNT(Id)c 
+                                        FROM Contact 
+                                        WHERE AccountId=:accid];
+            
+            Account acc = new Account(
+                ID = accid,
+                Number_of_Contacts__c = (Decimal)numConts.get('c')
+            );
+            
+            accs.add(acc);
+        }
+        update accs;
+    }
+
+}

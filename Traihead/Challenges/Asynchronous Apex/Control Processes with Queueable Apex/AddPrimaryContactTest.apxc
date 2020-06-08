@@ -1,0 +1,54 @@
+@isTest
+public class AddPrimaryContactTest {
+    @testSetup
+    static void setup(){
+        List<Account> accList = new List<Account>();
+        for(Integer i=0; i<50; i++){
+            Account NYacc = new Account(
+                Name = 'New York ' + i,
+                BillingState = 'NY'
+            );
+            Account CAacc = new Account(
+                Name = 'California ' + i,
+                BillingState = 'CA'
+            );  
+            accList.add(NYacc);
+            accList.add(CAacc);
+        }
+        insert accList;
+    }
+    
+    static testmethod void testQueueable(){
+        Contact contSample = new Contact(
+            FirstName = 'Bob', LastName = 'Li'
+        );
+        AddPrimaryContact NYcont = new AddPrimaryContact(contSample, 'NY');
+        AddPrimaryContact CAcont = new AddPrimaryContact(contSample, 'CA');
+        Test.startTest();
+        System.enqueueJob(NYcont);
+        System.enqueueJob(CAcont);
+        Test.stopTest();
+        
+        Integer nmbOfNoContactNYAccount=0;
+        Integer nmbOfNoContactCAAccount=0;
+        List<Account> NYaccounts = [SELECT ID, Name, (SELECT ID, LastName FROM Contacts) 
+                                    FROM Account WHERE BillingState='NY'];
+        List<Account> CAaccounts = [SELECT ID, Name, (SELECT ID, LastName FROM Contacts) 
+                                    FROM Account WHERE BillingState='CA'];
+        for(Account NYa: NYaccounts){
+            if(NYa.Contacts.size()==0){
+                nmbOfNoContactNYAccount++;
+            }
+        }
+        
+        for(Account CAa: CAaccounts){
+            if(CAa.Contacts.size()==0){
+                nmbOfNoContactCAAccount++;
+            }
+        }
+        
+        System.assertEquals(0, nmbOfNoContactNYAccount);
+        System.assertEquals(0, nmbOfNoContactCAAccount);
+    }
+
+}

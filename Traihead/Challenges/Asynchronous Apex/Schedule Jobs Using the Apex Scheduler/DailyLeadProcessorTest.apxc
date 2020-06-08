@@ -1,0 +1,35 @@
+@isTest
+private class DailyLeadProcessorTest {
+    
+    public static String CRON_EXP = '0 14 12 15 4 ? 2020';
+    
+    @testSetup
+    static void dataprepare(){
+        List<Lead> leadList = new List<Lead>();
+        for (Integer i=0; i<200; i++){
+            Lead l = new Lead(
+                FirstName = 'fn ' + i, LastName = 'ln ' + i,
+                Company = 'company ' + i
+            );
+            leadList.add(l);
+        }
+        insert leadList;
+    }
+    
+    static testmethod void testScheduledJob(){
+        Test.startTest();
+        DailyLeadProcessor LeadSourceChanged = new DailyLeadProcessor();
+        
+        String jobId = System.schedule('ScheduleLeadSourceToDreamforce',
+                                      CRON_EXP,
+                                      LeadSourceChanged);
+        List<Lead> llb = [SELECT ID FROM Lead WHERE LeadSource=null];
+        System.debug(llb.size());
+        System.assertEquals(200, llb.size());
+        Test.stopTest();
+        
+        List<Lead> lla = [SELECT ID FROM Lead WHERE LeadSource=null];
+        System.assertEquals(0, lla.size());
+    }
+
+}

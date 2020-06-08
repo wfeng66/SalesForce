@@ -1,0 +1,14 @@
+@isTest(seeAllData=true) 
+public class AccountProcessorTest {
+    @isTest
+    public static void TestAccountProcessor5(){
+        List<id> accIdList = new List<id>();
+        for(Account a: [SELECT ID FROM Account LIMIT 5]){
+            accIdList.add(a.id);
+        }
+
+        Test.startTest();
+             AccountProcessor.countContacts(accIdList);
+        Test.stopTest();
+    }
+}
