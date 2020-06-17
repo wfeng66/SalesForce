@@ -16,7 +16,6 @@
         // Send action off to be executed
         $A.enqueueAction(action);
     },
-    
     clickCreate: function(component, event, helper) {
         var validExpense = component.find('expenseform').reduce(function (validSoFar, inputCmp) {
             // Displays error messages for invalid fields
