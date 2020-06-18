@@ -1,0 +1,17 @@
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch master
+# Your branch is up to date with 'origin/master'.
+#
+# Changes to be committed:
+	new file:   Aura Components Basic/Expenses/.vim-force.com/session.properties
+	modified:   Aura Components Basic/Expenses/ExpensesController.apxc
+	modified:   Aura Components Basic/Expenses/expensesController.js
+	modified:   Aura Components Basic/Expenses/expensesHelper.js
+	new file:   Traihead/Materials/Aura Components Basics/Expenses/.vim-force.com/session.properties
+	modified:   Traihead/Materials/Aura Components Basics/Expenses/ExpensesController.apxc
+	modified:   Traihead/Materials/Aura Components Basics/Expenses/expensesController.js
+	modified:   Traihead/Materials/Aura Components Basics/Expenses/expensesHelper.js
+#
